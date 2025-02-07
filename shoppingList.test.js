@@ -84,13 +84,13 @@ describe("GET /items/:name", function() {
     test("Updates a single item", async () => {
         const resp = await request(app)
             .patch("/items/1")  // Update the item with ID 1
-            .send({ name: "butt nuggets", price: 3.50 });  // New data for the item 
+            .send({ name: "fun", price: 3.50 });  // New data for the item 
     
         expect(resp.statusCode).toBe(200);
         expect(resp.body).toEqual({
             item: { 
                 id: 1,
-                name: "butt nuggets", 
+                name: "fun", 
                 price: 3.50  
             }
         });
