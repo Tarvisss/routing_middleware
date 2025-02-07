@@ -1,7 +1,9 @@
 const express = require('express');
 const router = new express.Router();
-let itemsDb = require('./fakeDbTesting');
 const ExpressError = require('./expressError');
+let itemsDb = require('./fakeDb');
+ 
+
 
 // Get all items
 router.get('/', (req, res, next) => {
@@ -12,9 +14,9 @@ router.get('/', (req, res, next) => {
 // Get a single item by ID
 router.get('/:id', (req, res, next) => {
     const item = itemsDb.find(item => item.id === +req.params.id);
-    if (!item) {
-        throw new ExpressError("Not a valid id!", 400);
-    }
+    // if (!item) {
+    //     throw new ExpressError("Not a valid id!", 400);
+    // }
     res.json({ item });
 });
 
@@ -32,28 +34,35 @@ router.post('/', (req, res, next) => {
     res.status(201).json({ message: "New Item added", item: newItem});
 })
 
-router.patch("/:name", (req, res, next) => {
-    // Find the item by the name from the URL parameter
-    const itemToAlter = itemsDb.find(item => item.name.toLowerCase() === req.params.name.toLowerCase());
+router.patch('/:id', (req, res) => {
+    const { id } = req.params;
+    console.log('Requested ID:', id);
+    const item = itemsDb.find(item => item.id === parseInt(id, 10));
+    console.log('Found item:', item);
+    console.log('Request body:', req.body);
 
-    if (itemToAlter === undefined) {
-        return next(new ExpressError("Item not Found", 404)); 
+    if (!item) {
+        return res.status(404).json({ error: "Item not found" });
     }
-    itemToAlter.name = req.body.name;
-    itemToAlter.price = req.body.price;
 
-    // Return the updated item
-    res.json({ item: itemToAlter });
+    item.name = req.body.name || item.name;
+    item.price = req.body.price || item.price;
+
+    return res.status(200).json({
+        item: { 
+            id: item.id,
+            name: item.name,
+            price: item.price
+        }
+    });
 });
+
 
 
 router.delete("/:name", function(req, res, next) {
     const itemToRemove = itemsDb.findIndex(item => item.name === req.params.name);
-    if (itemToRemove === -1) {
-        throw new ExpressError("item not found", 404)
-    }
     itemsDb.splice(itemToRemove, 1)
-    res.json({ message: "deleted"})
+    res.json({ message: "Deleted"})
 })
 
 
